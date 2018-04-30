@@ -1,5 +1,19 @@
 # Rust and WebAssembly Workshop
 
+This is a Rust and WebAssembly workshop! It was originally held on
+[May 2<sup>nd</sup>, 2018 at the PDXRust meetup](https://www.meetup.com/PDXRust/events/249474845/).
+
+## Table of Contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Setup](#setup)
+- [Hello World](#hello-world)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Setup
 
 ### Rust Toolchain
