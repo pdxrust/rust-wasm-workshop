@@ -1,1 +1,6 @@
 .~lock.rust-wasm-workshop-intro-slides.odp#
+hello_world.d.ts
+hello_world.js
+hello_world_bg.wasm
+node_modules/
+target/
