@@ -15,6 +15,7 @@ This is a Rust and WebAssembly workshop! It was originally held on
   - [Rust Toolchain](#rust-toolchain)
   - [Node and `npm` Toolchain](#node-and-npm-toolchain)
 - [Hello World](#hello-world)
+  - [Running Tests](#running-tests)
 - [Conway's Game of Life](#conways-game-of-life)
   - [Design](#design)
     - [Infinite Universe?](#infinite-universe)
@@ -82,6 +83,34 @@ browser<sup>*</sup>, you should now see the hello-world alert dialog!
 
 [bug]: https://github.com/webpack/webpack/issues/6475
 [fix]: https://github.com/webpack/webpack/pull/7144
+
+### Running Tests
+
+Add this test to `src/lib.rs`:
+
+```rust
+#[test]
+fn two_plus_two() {
+    assert_eq!(2 + 2, 4);
+}
+```
+
+Now run `cargo test`. You should see this:
+
+```
+   Compiling hello_world v0.1.0 (file:///home/fitzgen/rust-wasm-workshop)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.88 secs
+     Running target/debug/deps/hello_world-d8a1e575b45635c6
+
+running 1 test
+test two_plus_two ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+```
+
+It is important that you familiarize yourself with running such tests. We will
+use unit tests to determine whether your implementation for a section is working
+or not, and therefore whether it is OK to start the next section or not.
 
 --------------------------------------------------------------------------------
 
