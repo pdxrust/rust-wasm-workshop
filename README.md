@@ -26,6 +26,9 @@ This is a Rust and WebAssembly workshop! It was originally held on
   - [Computing the Next Generation](#computing-the-next-generation)
     - [Testing `Universe::tick`](#testing-universetick)
   - [Rendering Each New Generation Inside `requestAnimationFrame`](#rendering-each-new-generation-inside-requestanimationframe)
+  - [Rendering to `<canvas>` Directly from Memory](#rendering-to-canvas-directly-from-memory)
+  - [More Exercises](#more-exercises)
+- [The End](#the-end)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -599,3 +602,203 @@ Refreshing [http://localhost:8080](http://localhost:8080) once more, and you
 should see the Game of Life animated before your eyes!
 
 --------------------------------------------------------------------------------
+
+### Rendering to `<canvas>` Directly from Memory
+
+Generating (and allocating) a `String` in Rust and then having `wasm-bindgen`
+convert it to a valid JavaScript string makes unnecessary copies of the
+universe's cells. Instead of our current `render` method, we can return a
+pointer to the start of the cells array. The JavaScript code knows the width and
+height of the universe, and can read the bytes that make up the cells directly.
+This design does not copy the universe's cells or tax the JavaScript garbage
+collector with allocations, but we must directly read the cells' bytes from
+WebAssembly's linear memory in JavaScript. Instead of rendering unicode text,
+we'll switch to using the [Canvas API]. We will use this design in the rest of
+the tutorial.
+
+[Canvas API]: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
+
+First, let's replace the `<pre>` we added earlier with a `<canvas>` we will
+render into (it too should be within the `<body>`, before the `<script>` that
+loads our JavaScript):
+
+```html
+<body>
+    <canvas id="game-of-life-canvas"></canvas>
+    <script src='./bootstrap.js'></script>
+</body>
+```
+
+Return to `src/lib.rs` and export (i.e. define them within the `#[wasm_bindgen]`
+block) three new functions to JavaScript:
+
+1. A `width` function that returns the width of the universe as a `u32`.
+
+2. A `height` function that returns the height of the universe as a `u32`.
+
+3. A `cells` function that returns a `*const Cell` pointer to the first cell in
+   the universe's `cells` array.
+
+Next, let's edit `index.js` and define some constants that JavaScript will use
+when rendering the canvas:
+
+```js
+const CELL_SIZE = 5; // px
+const GRID_COLOR = "#CCCCCC";
+const DEAD_COLOR = "#FFFFFF";
+const ALIVE_COLOR = "#000000";
+
+// These must match `Cell::Alive` and `Cell::Dead` in `src/lib.rs`.
+const DEAD = 0;
+const ALIVE = 1;
+```
+
+Now, let's rewrite our current JS code (except for the import) to no longer
+write to the `<pre>` but instead draw to the `<canvas>`:
+
+```js
+// Construct the universe, and get its width and height.
+const universe = Universe.new();
+const width = universe.width();
+const height = universe.height();
+
+// Give the canvas room for all of our cells and a 1px border
+// around each of them.
+const canvas = document.getElementById("game-of-life-canvas");
+canvas.height = (CELL_SIZE + 1) * height + 1;
+canvas.width = (CELL_SIZE + 1) * width + 1;
+
+const ctx = canvas.getContext('2d');
+
+const renderLoop = () => {
+  universe.tick();
+
+  drawGrid();
+  drawCells();
+
+  requestAnimationFrame(renderLoop);
+};
+```
+
+To draw the grid between cells, we draw a set of equally-spaced horizontal
+lines, and a set of equally-spaced vertical lines. These lines criss-cross to
+form the grid.
+
+```js
+const drawGrid = () => {
+  ctx.beginPath();
+  ctx.strokeStyle = GRID_COLOR;
+
+  // Vertical lines.
+  for (let i = 0; i <= width; i++) {
+    ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
+    ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);
+  }
+
+  // Horizontal lines.
+  for (let j = 0; j <= height; j++) {
+    ctx.moveTo(0,                           j * (CELL_SIZE + 1) + 1);
+    ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);
+  }
+
+  ctx.stroke();
+};
+```
+
+To draw the cells, we get the cells pointer into the WebAssembly linear memory
+from the universe, construct a `Uint8Array` overlaying the cells buffer, iterate
+over each cell, and draw a white or black rectangle depending on whether the
+cell is dead or alive, respectively. By working with pointers and overlays, we
+avoid copying the cells across the boundary on every tick.
+
+```js
+// Import the WebAssembly memory at the top of the file.
+import { memory } from "./hello_world_bg";
+
+// ...
+
+const getIndex = (row, column) => {
+  return row * width + column;
+};
+
+const drawCells = () => {
+  const cellsPtr = universe.cells();
+  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+
+  ctx.beginPath();
+
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const idx = getIndex(row, col);
+
+      ctx.fillStyle = cells[idx] === DEAD
+        ? DEAD_COLOR
+        : ALIVE_COLOR;
+
+      ctx.fillRect(
+        col * (CELL_SIZE + 1) + 1,
+        row * (CELL_SIZE + 1) + 1,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
+
+  ctx.stroke();
+};
+```
+
+To schedule rendering, we'll use the same code as above to start the first
+iteration of the rendering loop:
+
+```js
+requestAnimationFrame(renderLoop);
+```
+
+Rebuild and restart the development server:
+
+```
+npm run build-debug
+npm run serve
+```
+
+If you refresh [http://localhost:8080/](http://localhost:8080/), you should be
+greeted with an exciting display of life in `<canvas>`!
+
+### More Exercises
+
+* Instead of hard-coding the initial universe, generate a random one, where each
+  cell has a fifty-fifty chance of being alive or dead.
+
+  *Hint: use `wasm_bindgen` to import the `Math.random` JavaScript function:*
+
+  ```rust
+  #[wasm_bindgen]
+  extern {
+      #[wasm_bindgen(js_namespace = Math)]
+      fn random() -> f64;
+  }
+  ```
+
+* Representing each cell with a byte makes iterating over cells easy, but it
+  comes at the cost of wasting memory. Each byte is eight bits, but we only
+  require a single bit to represent whether each cell is alive or dead. Refactor
+  the data representation so that each cell uses only a single bit of space.
+
+## The End
+
+Thanks for following along!
+
+For more Rust and WebAssembly, check out:
+
+* [Follow @rustwasm on Twitter](https://twitter.com/rustwasm)
+
+* Join us on IRC at `#rust-wasm` on `irc.mozilla.org`
+
+* [Read the Rust and WebAssembly Book.](https://rust-lang-nursery.github.io/rust-wasm/)
+  This workshop was derived from the Game of Life tutorial in this book. The
+  book keeps going and discusses profiling for speed and size, as well as
+  debugging in depth!
+
+* Get involved in making Rust and WebAssembly a great combination by
+  [joining the working group!](https://github.com/rust-lang-nursery/rust-wasm#get-involved)
