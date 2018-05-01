@@ -45,7 +45,7 @@ If you don't have `rustup` installed yet, run:
 Next, use `rustup` to install the latest nightly and the
 `wasm32-unknown-unknown` target:
 
-    rustup component add nightly
+    rustup toolchain add nightly
     rustup update nightly
     rustup target add wasm32-unknown-unknown --toolchain nightly
 
