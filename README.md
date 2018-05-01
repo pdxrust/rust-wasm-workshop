@@ -300,6 +300,8 @@ And you can use it like this:
 log!("the value of `x` is {}", x);
 ```
 
+If you open your browser's developer tools console, you can view the logs.
+
 --------------------------------------------------------------------------------
 
 ### Computing the Next Generation
