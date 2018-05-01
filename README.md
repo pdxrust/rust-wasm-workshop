@@ -428,6 +428,6 @@ Let's rebuild and restart the server:
     npm run serve
 
 Refreshing [http://localhost:8080](http://localhost:8080) once more, and you
-should see the Game of Life played out before your eyes!
+should see the Game of Life animated before your eyes!
 
 --------------------------------------------------------------------------------
