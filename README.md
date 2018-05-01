@@ -78,6 +78,8 @@ browser<sup>*</sup>, you should now see the hello-world alert dialog!
 [bug]: https://github.com/webpack/webpack/issues/6475
 [fix]: https://github.com/webpack/webpack/pull/7144
 
+--------------------------------------------------------------------------------
+
 ## Conway's Game of Life
 
 We will be implementing [Conway's Game of Life][gol]. If you're unfamiliar with
@@ -272,8 +274,33 @@ If you re-run
 
 then you should be able to refresh
 [http://localhost:8080](http://localhost:8080) and see a text representation of
-your universe! If not, it is time to troubleshoot and debug. Raise your hand and
-ask a mentor for help if you are stuck!
+your universe!
+
+If not, it is time to troubleshoot and debug. Raise your hand and ask a mentor
+for help if you are stuck!
+
+You can add logging to help debug like this:
+
+```rust
+#[wasm_bindgen]
+extern {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(msg: &str);
+}
+
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+macro_rules! log {
+    ($($t:tt)*) => (log(&format!($($t)*)))
+}
+```
+
+And you can use it like this:
+
+```rust
+log!("the value of `x` is {}", x);
+```
+
+--------------------------------------------------------------------------------
 
 ### Computing the Next Generation
 
