@@ -17,6 +17,9 @@ This is a Rust and WebAssembly workshop! It was originally held on
   - [Design](#design)
     - [Infinite Universe?](#infinite-universe)
     - [Representing Cells](#representing-cells)
+  - [Defining `Cell` and `Universe`](#defining-cell-and-universe)
+  - [Rendering to the DOM with JavaScript](#rendering-to-the-dom-with-javascript)
+  - [Computing the Next Generation](#computing-the-next-generation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
