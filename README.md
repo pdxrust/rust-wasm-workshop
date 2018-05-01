@@ -209,7 +209,7 @@ The state of the universe is represented as a vector of cells. To make this
 human readable, let's implement a basic text renderer. The idea is to write the
 universe line by line as text, and for each cell that is alive, print the
 unicode character `◼️` ("black medium square"). For dead cells, we'll print `◻️`
-(a "white medium square").
+(a "white medium square"). After each row, a newline should be printed.
 
 By implementing the [`Display`] trait from Rust's standard library, we can add a
 way to format a structure in a user-facing manner. This will also automatically
@@ -223,15 +223,7 @@ use std::fmt;
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for line in self.cells.as_slice().chunks(self.width as usize) {
-            for cell in line {
-                // Write a white or black square depending on if the cell is
-                // dead or alive, respectively!
-            }
-            write!(f, "\n")?;
-        }
-
-        Ok(())
+        unimplemented!("insert code here")
     }
 }
 ```
@@ -257,8 +249,6 @@ Add this test to `src/lib.rs`:
 ```rust
 #[test]
 fn universe_displays_correctly() {
-    use std::string::ToString;
-
     let universe = Universe {
         width: 4,
         height: 4,
@@ -280,7 +270,7 @@ fn universe_displays_correctly() {
 }
 ```
 
-Make sure that running `cargo test` reports it passing before continuing!
+Make sure that running `cargo test` reports this test passing before continuing!
 
 ### Rendering to the DOM with JavaScript
 
@@ -375,13 +365,13 @@ If you open your browser's developer tools console, you can view the logs.
 Now that we can draw the universe, let's turn our attention to computing the
 next generation inside `src/lib.rs`.
 
-To access the cell at a given row and column, we translate the row and column
-into an index into the cells vector, as described earlier:
+To access the cell at a given row and column, translate the row and column into
+an index into the cells vector, as described earlier:
 
 ```rust
 impl Universe {
     fn get_index(&self, row: u32, column: u32) -> usize {
-        (row * self.width + column) as usize
+        unimplemented!("insert code here")
     }
 }
 ```
@@ -452,7 +442,7 @@ impl Universe {
 
         for row in 0..self.height {
             for col in 0..self.width {
-                // <insert code here>
+                unimplemented!("insert code here")
             }
         }
 
@@ -460,6 +450,99 @@ impl Universe {
     }
 }
 ```
+
+#### Testing `Universe::tick`
+
+Add the following tests to `src/lib.rs`:
+
+```rust
+use Cell::*;
+
+fn assert_tick(w: u32, h: u32, before: Vec<Cell>, after: Vec<Cell>) {
+    assert_eq!(before.len(), after.len());
+    assert_eq!(w as usize * h as usize, before.len());
+
+    let mut universe = Universe {
+        width: w,
+        height: h,
+        cells: before,
+    };
+    universe.tick();
+
+    assert_eq!(
+        &universe.cells[..],
+        &after[..]
+    );
+}
+
+#[test]
+fn tick_rule_1() {
+    assert_tick(
+        5,
+        5,
+        vec![
+            Dead, Dead, Dead,  Dead, Dead,
+            Dead, Dead, Dead,  Dead, Dead,
+            Dead, Dead, Alive, Dead, Dead,
+            Dead, Dead, Dead,  Dead, Dead,
+            Dead, Dead, Dead,  Dead, Dead,
+        ],
+        vec![
+            Dead, Dead, Dead, Dead, Dead,
+            Dead, Dead, Dead, Dead, Dead,
+            Dead, Dead, Dead, Dead, Dead,
+            Dead, Dead, Dead, Dead, Dead,
+            Dead, Dead, Dead, Dead, Dead,
+        ],
+    );
+}
+
+#[test]
+fn tick_rule_2() {
+    assert_tick(
+        5,
+        5,
+        vec![
+            Dead, Dead,  Dead,  Dead, Dead,
+            Dead, Dead,  Dead,  Dead, Dead,
+            Dead, Alive, Alive, Dead, Dead,
+            Dead, Alive, Alive, Dead, Dead,
+            Dead, Dead,  Dead,  Dead, Dead,
+        ],
+        vec![
+            Dead, Dead,  Dead,  Dead, Dead,
+            Dead, Dead,  Dead,  Dead, Dead,
+            Dead, Alive, Alive, Dead, Dead,
+            Dead, Alive, Alive, Dead, Dead,
+            Dead, Dead,  Dead,  Dead, Dead,
+        ],
+    );
+}
+
+#[test]
+fn tick_rules_3_and_4() {
+    assert_tick(
+        5,
+        5,
+        vec![
+            Dead, Dead,  Dead,  Dead,  Dead,
+            Dead, Dead,  Alive, Dead,  Dead,
+            Dead, Alive, Alive, Alive, Dead,
+            Dead, Dead,  Alive, Dead,  Dead,
+            Dead, Dead,  Dead,  Dead,  Dead,
+        ],
+        vec![
+            Dead, Dead,  Dead,  Dead,  Dead,
+            Dead, Alive, Alive, Alive, Dead,
+            Dead, Alive, Dead,  Alive, Dead,
+            Dead, Alive, Alive, Alive, Dead,
+            Dead, Dead,  Dead,  Dead,  Dead,
+        ],
+    );
+}
+```
+
+Make sure that these tests pass when you run `cargo test` before continuing!
 
 ### Rendering Each New Generation Inside `requestAnimationFrame`
 
