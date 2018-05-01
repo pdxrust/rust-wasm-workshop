@@ -1,7 +1,7 @@
 # Rust and WebAssembly Workshop
 
 This is a Rust and WebAssembly workshop! It was originally held on
-[May 2<sup>nd</sup>, 2018 at the PDXRust meetup](https://www.meetup.com/PDXRust/events/249474845/).
+[May 2nd, 2018 at the PDXRust meetup](https://www.meetup.com/PDXRust/events/249474845/).
 
 ## Table of Contents
 
@@ -10,7 +10,10 @@ This is a Rust and WebAssembly workshop! It was originally held on
 
 
 - [Setup](#setup)
+  - [Rust Toolchain](#rust-toolchain)
+  - [Node and `npm` Toolchain](#node-and-npm-toolchain)
 - [Hello World](#hello-world)
+- [Conway's Game of Life](#conways-game-of-life)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -67,4 +70,12 @@ browser<sup>*</sup>, you should now see the hello-world alert dialog!
 > Chrome (like it does currently in, for example, Firefox).
 
 [bug]: https://github.com/webpack/webpack/issues/6475
-[fix]: https://github.com/webpack/webpack/pull/6709
+[fix]: https://github.com/webpack/webpack/pull/7144
+
+## Conway's Game of Life
+
+We will be implementing [Conway's Game of Life][gol]. If you're unfamiliar with
+it, you can follow that link to Wikipedia, or wait for the group to go through
+the Game of Life intro slides together.
+
+[gol]: https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
