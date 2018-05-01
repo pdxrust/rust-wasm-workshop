@@ -250,6 +250,38 @@ impl Universe {
 }
 ```
 
+#### Testing the `Universe`'s `Display` Implementation
+
+Add this test to `src/lib.rs`:
+
+```rust
+#[test]
+fn universe_displays_correctly() {
+    use std::string::ToString;
+
+    let universe = Universe {
+        width: 4,
+        height: 4,
+        cells: vec![
+            Cell::Dead,  Cell::Dead,  Cell::Dead,  Cell::Dead,
+            Cell::Dead,  Cell::Dead,  Cell::Dead,  Cell::Alive,
+            Cell::Dead,  Cell::Dead,  Cell::Alive, Cell::Alive,
+            Cell::Dead,  Cell::Alive, Cell::Alive, Cell::Alive,
+        ],
+    };
+
+    assert_eq!(
+        universe.to_string(),
+        "◻️◻️◻️◻️\n\
+         ◻️◻️◻️◼️\n\
+         ◻️◻️◼️◼️\n\
+         ◻️◼️◼️◼️\n"
+    );
+}
+```
+
+Make sure that running `cargo test` reports it passing before continuing!
+
 ### Rendering to the DOM with JavaScript
 
 First, let's add a `<pre>` element to our `index.html` to render the universe
