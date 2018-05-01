@@ -789,7 +789,7 @@ greeted with an exciting display of life in `<canvas>`!
 
 Thanks for following along!
 
-For more Rust and WebAssembly, check out:
+For more Rust and WebAssembly:
 
 * [Follow @rustwasm on Twitter](https://twitter.com/rustwasm)
 
