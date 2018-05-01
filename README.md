@@ -79,3 +79,30 @@ it, you can follow that link to Wikipedia, or wait for the group to go through
 the Game of Life intro slides together.
 
 [gol]: https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+
+### Design
+
+Before we dive into writing code, we have some design decisions to consider.
+
+#### Infinite Universe?
+
+The Game of Life is technically played in an infinite universe, but we do not
+have infinite memory and compute power. Instead, we will create a fixed-size,
+periodic universe, where cells on the edges have neighbors that wrap around to
+the other side of the universe.
+
+#### Representing Cells
+
+We can represent the universe as a flat array, and has a byte for each cell. We
+will use `0` for dead cells and `1` for alive cells.
+
+Here is what a 4 by 4 universe looks like:
+
+![Screenshot of a 4 by 4 universe](./4-by-4-universe.png)
+
+To find the array index of the cell at a given row and column in the universe,
+we can use this formula:
+
+```text
+index(row, column, universe) = row * width(universe) + column
+```
