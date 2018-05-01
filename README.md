@@ -109,3 +109,255 @@ we can use this formula:
 ```text
 index(row, column, universe) = row * width(universe) + column
 ```
+
+### Defining `Cell` and `Universe`
+
+Let's begin by removing the `alert` import and `greet` function from
+`src/lib.rs`, and replacing them with a type definition for cells:
+
+```rust
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Cell {
+    Dead = 0,
+    Alive = 1,
+}
+```
+
+Next, let's define the universe. The universe has a width and a height, and a
+vector of cells of length `width * height`.
+
+```rust
+#[wasm_bindgen]
+pub struct Universe {
+    width: u32,
+    height: u32,
+    cells: Vec<Cell>,
+}
+```
+
+Let's define a constructor that initializes the universe with an interesting
+initial pattern of live and dead cells:
+
+```rust
+/// Public methods, exported to JavaScript.
+#[wasm_bindgen]
+impl Universe {
+    pub fn new() -> Universe {
+        let width = 64;
+        let height = 64;
+
+        let cells = (0..width * height)
+            .map(|i| {
+                if i % 2 == 0 || i % 7 == 0 {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect();
+
+        Universe {
+            width,
+            height,
+            cells,
+        }
+    }
+}
+```
+
+The state of the universe is represented as a vector of cells. To make this
+human readable, let's implement a basic text renderer. The idea is to write the
+universe line by line as text, and for each cell that is alive, print the
+unicode character `◼️` ("black medium square"). For dead cells, we'll print `◻️`
+(a "white medium square").
+
+By implementing the [`Display`] trait from Rust's standard library, we can add a
+way to format a structure in a user-facing manner. This will also automatically
+give us a [`to_string`] method.
+
+[`Display`]: https://doc.rust-lang.org/1.25.0/std/fmt/trait.Display.html
+[`to_string`]: https://doc.rust-lang.org/1.25.0/std/string/trait.ToString.html
+
+```rust
+use std::fmt;
+
+impl fmt::Display for Universe {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for line in self.cells.as_slice().chunks(self.width as usize) {
+            for cell in line {
+                // Write a white or black square depending on if the cell is
+                // dead or alive, respectively!
+            }
+            write!(f, "\n")?;
+        }
+
+        Ok(())
+    }
+}
+```
+
+Next, let's expose the human-readable text to JavaScript, via a `render` method:
+
+```rust
+/// Public methods, exported to JavaScript.
+#[wasm_bindgen]
+impl Universe {
+    // ...
+
+    pub fn render(&self) -> String {
+        self.to_string()
+    }
+}
+```
+
+### Rendering to the DOM with JavaScript
+
+First, let's add a `<pre>` element to our `index.html` to render the universe
+into:
+
+```html
+<body>
+    <pre id="game-of-life-canvas"></pre>
+    <script src='./bootstrap.js'></script>
+</body>
+```
+
+Additionally, we want the `<pre>` centered in the middle of the Web page. Wbbe
+can use CSS flex boxes to accomplish this task. Add the following `<style>` tag
+inside `index.html`'s `<head>`:
+
+```html
+<style>
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+```
+
+At the top of `index.js`, let's fix our import to bring in the `Universe` rather
+than the old `greet` function:
+
+```js
+import { Universe } from "./hello_world";
+```
+
+Also, let's get that `<pre>` element we just added and instantiate a new
+universe:
+
+```js
+const pre = document.getElementById("game-of-life-canvas");
+const universe = Universe.new();
+```
+
+Now, we can draw the initial universe into the `<pre>`!
+
+```js
+pre.textContent = universe.render();
+```
+
+If you re-run
+
+    npm run build-debug
+    npm run serve
+
+then you should be able to refresh
+[http://localhost:8080](http://localhost:8080) and see a text representation of
+your universe! If not, it is time to troubleshoot and debug. Raise your hand and
+ask a mentor for help if you are stuck!
+
+### Computing the Next Generation
+
+TODO FITZGEN
+
+To access the cell at a given row and column, we translate the row and column
+into an index into the cells vector, as described earlier:
+
+```rust
+impl Universe {
+    fn get_index(&self, row: u32, column: u32) -> usize {
+        (row * self.width + column) as usize
+    }
+}
+```
+
+In order to calculate the next state of a cell, we need to get a count of how
+many of its neighbors are alive. Let's write a `live_neighbor_count` method to
+do just that!
+
+```rust
+impl Universe {
+    // ...
+
+    fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
+        let mut count = 0;
+        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
+            for delta_col in [self.width - 1, 0, 1].iter().cloned() {
+                if delta_row == 0 && delta_col == 0 {
+                    continue;
+                }
+
+                let neighbor_row = (row + delta_row) % self.height;
+                let neighbor_col = (column + delta_col) % self.width;
+                let idx = self.get_index(neighbor_row, neighbor_col);
+                count += self.cells[idx] as u8;
+            }
+        }
+        count
+    }
+}
+```
+
+The `live_neighbor_count` method uses deltas and modulo to avoid special casing
+the edges of the universe with `if`s. When applying a delta of `-1`, we *add*
+`self.height - 1` and let the modulo do its thing, rather than attempting to
+subtract `1`. `row` and `column` can be `0`, and if we attempted to subtract `1`
+from them, there would be an unsigned integer underflow.
+
+Now we have everything we need to compute the next generation from the current
+one!
+
+Recall the rules for each cell's state transition:
+
+1. Any live cell with fewer than two live neighbours dies, as if caused by
+   underpopulation.
+
+2. Any live cell with two or three live neighbours lives on to the next
+   generation.
+
+3. Any live cell with more than three live neighbours dies, as if by
+   overpopulation.
+
+4. Any dead cell with exactly three live neighbours becomes a live cell, as if
+   by reproduction.
+
+All other cells remain in the same state.
+
+Translate these rules into Rust code by filling in the `tick` method's
+definition:
+
+```rust
+/// Public methods, exported to JavaScript.
+#[wasm_bindgen]
+impl Universe {
+    // ...
+
+    pub fn tick(&mut self) {
+        let mut next = self.cells.clone();
+
+        for row in 0..self.height {
+            for col in 0..self.width {
+                // <insert code here>
+            }
+        }
+
+        self.cells = next;
+    }
+}
+```
