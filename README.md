@@ -3,6 +3,8 @@
 This is a Rust and WebAssembly workshop! It was originally held on
 [May 2nd, 2018 at the PDXRust meetup](https://www.meetup.com/PDXRust/events/249474845/).
 
+--------------------------------------------------------------------------------
+
 ## Table of Contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -20,8 +22,11 @@ This is a Rust and WebAssembly workshop! It was originally held on
   - [Defining `Cell` and `Universe`](#defining-cell-and-universe)
   - [Rendering to the DOM with JavaScript](#rendering-to-the-dom-with-javascript)
   - [Computing the Next Generation](#computing-the-next-generation)
+  - [Rendering Each New Generation Inside `requestAnimationFrame`](#rendering-each-new-generation-inside-requestanimationframe)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+--------------------------------------------------------------------------------
 
 ## Setup
 
@@ -306,7 +311,8 @@ If you open your browser's developer tools console, you can view the logs.
 
 ### Computing the Next Generation
 
-TODO FITZGEN
+Now that we can draw the universe, let's turn our attention to computing the
+next generation inside `src/lib.rs`.
 
 To access the cell at a given row and column, we translate the row and column
 into an index into the cells vector, as described earlier:
@@ -393,3 +399,35 @@ impl Universe {
     }
 }
 ```
+
+### Rendering Each New Generation Inside `requestAnimationFrame`
+
+Remove the old `pre.textContent = universe.render();` line of code from
+`index.js`. We will replace it with a recursive `requestAnimationFrame` loop. On
+each iteration, it computes the next generation of the universe by calling
+`tick`, and then renders the result into the `<pre>`:
+
+```js
+const renderLoop = () => {
+  universe.tick();
+  pre.textContent = universe.render();
+  requestAnimationFrame(renderLoop);
+};
+```
+
+To kick off the rendering process, all we have to do is schedule the initial
+animation frame callback:
+
+```js
+requestAnimationFrame(renderLoop);
+```
+
+Let's rebuild and restart the server:
+
+    npm run build-debug
+    npm run serve
+
+Refreshing [http://localhost:8080](http://localhost:8080) once more, and you
+should see the Game of Life played out before your eyes!
+
+--------------------------------------------------------------------------------
