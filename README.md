@@ -14,6 +14,9 @@ This is a Rust and WebAssembly workshop! It was originally held on
   - [Node and `npm` Toolchain](#node-and-npm-toolchain)
 - [Hello World](#hello-world)
 - [Conway's Game of Life](#conways-game-of-life)
+  - [Design](#design)
+    - [Infinite Universe?](#infinite-universe)
+    - [Representing Cells](#representing-cells)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
