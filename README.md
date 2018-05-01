@@ -542,6 +542,28 @@ fn tick_rules_3_and_4() {
         ],
     );
 }
+
+#[test]
+fn tick_cells_on_edge() {
+    assert_tick(
+        5,
+        5,
+        vec![
+            Dead,  Dead, Dead, Dead,  Dead,
+            Dead,  Dead, Dead, Dead,  Dead,
+            Alive, Dead, Dead, Alive, Alive,
+            Dead,  Dead, Dead, Dead,  Dead,
+            Dead,  Dead, Dead, Dead,  Dead,
+        ],
+        vec![
+            Dead, Dead, Dead, Dead, Dead,
+            Dead, Dead, Dead, Dead, Alive,
+            Dead, Dead, Dead, Dead, Alive,
+            Dead, Dead, Dead, Dead, Alive,
+            Dead, Dead, Dead, Dead, Dead,
+        ],
+    );
+}
 ```
 
 Make sure that these tests pass when you run `cargo test` before continuing!
