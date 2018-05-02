@@ -160,8 +160,8 @@ index(row, column, universe) = row * width(universe) + column
 
 ### Defining `Cell` and `Universe`
 
-Let's begin by removing the `alert` import and `greet` function from
-`src/lib.rs`, and replacing them with a type definition for cells:
+Let's begin by removing the `alert` import, `greet` function, and `two_plus_two`
+test from `src/lib.rs`, and replacing them with a type definition for cells:
 
 ```rust
 #[repr(u8)]
@@ -237,7 +237,8 @@ impl fmt::Display for Universe {
 }
 ```
 
-Next, let's expose the human-readable text to JavaScript, via a `render` method:
+Next, let's expose the human-readable text to JavaScript, by adding a `render`
+method to the `impl Universe`:
 
 ```rust
 /// Public methods, exported to JavaScript.
@@ -285,7 +286,7 @@ continuing!
 ### Rendering to the DOM with JavaScript
 
 First, let's add a `<pre>` element to our `index.html` to render the universe
-into:
+into. Edit the `<body>` element to look like this:
 
 ```html
 <body>
@@ -360,7 +361,10 @@ macro_rules! log {
 }
 ```
 
-And you can use it like this:
+The `macro_rules!` definition needs to appear before all uses of the `log!`
+macro it defines, so you should place it towards the top of the file.
+
+You can use it like this:
 
 ```rust
 log!("the value of `x` is {}", x);
@@ -385,6 +389,12 @@ impl Universe {
     }
 }
 ```
+
+We could just add this method to to the `impl` block we started above, but we
+did label that one “Public methods, exported to JavaScript”, and `get_index`
+isn't part of the API we want to expose to JS. It's nice to keep the public API
+separate, so we'll start a second `impl Universe` block and put `get_index`
+there.
 
 In order to calculate the next state of a cell, we need to get a count of how
 many of its neighbors are alive. Let's write a `live_neighbor_count` method to
@@ -460,6 +470,9 @@ impl Universe {
     }
 }
 ```
+
+Since we want to call this from JavaScript, be sure to put this function in the
+`impl Universe` block with the `#[wasm_bindgen]` attribute above it!
 
 #### Testing `Universe::tick`
 
