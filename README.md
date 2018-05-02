@@ -100,7 +100,7 @@ fn two_plus_two() {
 }
 ```
 
-Now run `cargo test`. You should see this:
+Now run `cargo +nightly test`. You should see this:
 
 ```
    Compiling hello_world v0.1.0 (file:///home/fitzgen/rust-wasm-workshop)
@@ -275,7 +275,8 @@ fn universe_displays_correctly() {
 }
 ```
 
-Make sure that running `cargo test` reports this test passing before continuing!
+Make sure that running `cargo +nightly test` reports this test passing before
+continuing!
 
 ### Rendering to the DOM with JavaScript
 
@@ -569,7 +570,8 @@ fn tick_cells_on_edge() {
 }
 ```
 
-Make sure that these tests pass when you run `cargo test` before continuing!
+Make sure that these tests pass when you run `cargo +nightly test` before
+continuing!
 
 ### Rendering Each New Generation Inside `requestAnimationFrame`
 
