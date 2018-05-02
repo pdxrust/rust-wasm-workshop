@@ -81,6 +81,9 @@ project and run the development server!
 If you navigate to [http://localhost:8080](http://localhost:8080) in your
 browser<sup>*</sup>, you should now see the hello-world alert dialog!
 
+You can interrupt the server and get your shell prompt back just by hitting
+control-C.
+
 > ### <sup>*</sup> Caveat for Chrome Users
 >
 > Due to a [bug in Webpack][bug], this example does not yet work in Chrome. Once
