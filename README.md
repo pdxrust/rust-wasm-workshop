@@ -272,10 +272,10 @@ fn universe_displays_correctly() {
 
     assert_eq!(
         universe.to_string(),
-        "◻️◻️◻️◻️\n\
-         ◻️◻️◻️◼️\n\
-         ◻️◻️◼️◼️\n\
-         ◻️◼️◼️◼️\n"
+        "◻ ◻ ◻ ◻ \n\
+         ◻ ◻ ◻ ◼ \n\
+         ◻ ◻ ◼ ◼ \n\
+         ◻ ◼ ◼ ◼ \n"
     );
 }
 ```
