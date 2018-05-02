@@ -295,7 +295,7 @@ into. Edit the `<body>` element to look like this:
 </body>
 ```
 
-Additionally, we want the `<pre>` centered in the middle of the Web page. Wbbe
+Additionally, we want the `<pre>` centered in the middle of the Web page. We
 can use CSS flex boxes to accomplish this task. Add the following `<style>` tag
 inside `index.html`'s `<head>`:
 
