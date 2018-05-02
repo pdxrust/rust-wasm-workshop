@@ -69,6 +69,7 @@ installed, you can skip this.
 Clone the project template:
 
     git clone https://github.com/pdxrust/rust-wasm-workshop.git --branch hello-world
+    cd rust-wasm-workshop
 
 Take a look at the contents of `index.js` and `src/lib.rs`. Then build the
 project and run the development server!
