@@ -84,12 +84,6 @@ browser<sup>*</sup>, you should now see the hello-world alert dialog!
 You can interrupt the server and get your shell prompt back just by hitting
 control-C.
 
-> ### <sup>*</sup> Caveat for Chrome Users
->
-> Due to a [bug in Webpack][bug], this example does not yet work in Chrome. Once
-> that bug is [fixed in upstream Webpack][fix] then this example will work in
-> Chrome (like it does currently in, for example, Firefox).
-
 [bug]: https://github.com/webpack/webpack/issues/6475
 [fix]: https://github.com/webpack/webpack/pull/7144
 
